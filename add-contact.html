@@ -1,59 +1,94 @@
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body>
-        <br/>
-        <form id="editForm">
-            <label for="firstname">First name</label>
-            <input type="text" name="firstname" id="firstname"><br/>
-            <label for="lastname">Last name</label>
-            <input type="text" name="lastname" id="lastname"><br/>
-            <label for="mobile">Mobile</label>
-            <input type="text" name="mobile" id="mobile"><br/>
-            <label for="email">Email</label>
-            <input type="text" name="email" id="email"><br/>
-            <label for="avatar">Select a file</label><br/>
-            <input type="file" name="avatar" id="avatar"><br/>
-            <button type="submit" id="submitForm">Submit</button>
-        </form>
-        <br/>
-        <button id="homeLink" type="button">Home</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Contact</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Dark Mode Toggle Button -->
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
 
-        <script src="config.js"></script>
-        <script>
-            document.getElementById("submitForm").addEventListener('click', submitForm);
-            document.getElementById("homeLink").addEventListener('click', homeLink);
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Add New Contact</h1>
+        </header>
 
-            function submitForm(e){
-                e.preventDefault();
+        <div class="form-container">    
+            <form id="editForm" class="modern-form">
+                <div class="form-group">
+                    <label for="firstname">First name</label>
+                    <input type="text" name="firstname" id="firstname" class="modern-input">
+                </div>
 
-                const form = new FormData(document.querySelector('#editForm'));
-                form.append('apiKey', apiKey);
+                <div class="form-group">
+                    <label for="lastname">Last name</label>
+                    <input type="text" name="lastname" id="lastname" class="modern-input">
+                </div>
 
-                fetch(rootPath + 'controller/insert-contact/', {
-                    method: 'POST',
-                    headers: {'Accept': 'application/json, *.*'},
-                    body: form
-                })
-                .then(function(response){
-                    return response.text();
-                })
-                .then(function(data){
-                    if(data == "1"){
-                        alert("Contact added.");
-                        homeLink();
-                    }else{
-                        alert(data);
-                        homeLink();
-                    }
-                })
-            }
+                <div class="form-group">
+                    <label for="mobile">Mobile</label>
+                    <input type="text" name="mobile" id="mobile" class="modern-input">
+                </div>
 
-            function homeLink(){
-                window.open("index.html", "_self");
-            }
-        </script>
-    </body>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="text" name="email" id="email" class="modern-input">
+                </div>
+
+                <div class="form-group">
+                    <label for="avatar" class="file-upload-label">
+                        <span>Select a file</span>
+                        <input type="file" name="avatar" id="avatar" class="file-upload">
+                    </label>
+                </div>
+        
+                <div class="form-actions">   
+                    <button type="submit" id="submitForm" class="btn submit-btn">Submit</button>
+                    <button id="homeLink" type="button" class="btn home-btn">Home</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="theme.js"></script>
+    <script>
+        document.getElementById("submitForm").addEventListener('click', submitForm);
+        document.getElementById("homeLink").addEventListener('click', homeLink);
+
+        function submitForm(e){
+            e.preventDefault();
+
+            const form = new FormData(document.querySelector('#editForm'));
+            form.append('apiKey', apiKey);
+
+            fetch(rootPath + 'controller/insert-contact/', {
+                method: 'POST',
+                headers: {'Accept': 'application/json, *.*'},
+                body: form
+            })
+            .then(function(response){
+                return response.text();
+            })
+            .then(function(data){
+                if(data == "1"){
+                    alert("Contact added.");
+                    homeLink();
+                }else{
+                    alert(data);
+                    homeLink();
+                }
+            })
+        }
+
+        function homeLink(){
+            window.open("index.html", "_self");
+        }
+    </script>
+</body>
 </html>

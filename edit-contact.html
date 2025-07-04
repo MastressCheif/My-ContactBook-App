@@ -1,120 +1,197 @@
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body onload="getContact()">
-        <div id="avatarImage"></div>
-        <form id="editForm">
-            <label for="firstname">First name</label>
-            <input type="text" name="firstname" id="firstname" readonly><br/>
-            <label for="lastname">Last name</label>
-            <input type="text" name="lastname" id="lastname" readonly><br/>
-            <label for="mobile">Mobile</label>
-            <input type="text" name="mobile" id="mobile" readonly><br/>
-            <label for="email">Email</label>
-            <input type="text" name="email" id="email" readonly><br/>
-            <label for="avatar" id="avatarLabel" hidden>Change profile image</label><br/>
-            <input type="file" name="avatar" id="avatar" hidden><br/>
-            <br/>
-            <button type="submit" id="submitForm" hidden>Submit</button>
-        </form>
-        <br/><br/>
-        <button id="homeLink" type="button">Home</button>
-        <button id="editContact" type="button">Edit</button>
-        <button id="deleteContact" type="button">Delete</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Contact</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body onload="getContact()">
+    <!-- Dark Mode Toggle Button -->
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
 
-        <script src="config.js"></script>
-        <script>
-            var id = getId();
-            document.getElementById("homeLink").addEventListener('click', homeLink);
-            document.getElementById("editContact").addEventListener('click', editContact);
-            document.getElementById("submitForm").addEventListener('click', submitForm);
-            document.getElementById("deleteContact").addEventListener('click', deleteContact);
-            
-            function getId(){
-                var url = window.location.href;
-                var pos = url.search("=");
-                var id = url.slice(pos + 1);
-                return id;
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Contact Details</h1>
+        </header>
+
+        <div class="contact-view">
+            <form id="editForm" class="modern-form">
+                <div class="avatar-container">        
+                    <div id="avatarImage" class="avatar-preview"></div>
+                    <label for="avatar" id="avatarLabel" class="file-upload-label" style="display: none;">
+                        <span>Change Profile Image</span>
+                        <input type="file" name="avatar" id="avatar" accept="image/*" class="file-upload">
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="firstname">First name</label>
+                    <input type="text" name="firstname" id="firstname" class="modern-input" readonly>
+                </div>
+         
+                <div class="form-group">
+                    <label for="lastname">Last name</label>
+                    <input type="text" name="lastname" id="lastname" class="modern-input" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile">Mobile</label>
+                    <input type="text" name="mobile" id="mobile" class="modern-input" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="text" name="email" id="email" class="modern-input" readonly>
+                </div>
+                
+                <!-- View Mode Buttons -->
+                <div class="form-actions" id="viewModeButtons">
+                    <button id="homeLink" type="button" class="btn home-btn">Home</button>
+                    <button id="editContact" type="button" class="btn edit-btn">Edit</button>
+                    <button id="deleteContact" type="button" class="btn delete-btn">Delete</button>
+                </div>
+
+                <!-- Edit Mode Buttons -->
+                <div id="editModeButtons" style="display: none;">
+                    <div class="form-actions submit-action">
+                        <button type="submit" id="submitForm" class="btn submit-btn">Submit</button>
+                    </div>
+                    <div class="form-actions">
+                        <button id="homeLinkEdit" type="button" class="btn home-btn">Home</button>
+                        <button id="editContactEdit" type="button" class="btn edit-btn">Edit</button>
+                        <button id="deleteContactEdit" type="button" class="btn delete-btn">Delete</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="theme.js"></script>
+    <script>
+        var id = getId();
+        
+        document.getElementById("homeLink").addEventListener('click', homeLink);
+        document.getElementById("homeLinkEdit").addEventListener('click', homeLink);
+        document.getElementById("editContact").addEventListener('click', editContact);
+        document.getElementById("editContactEdit").addEventListener('click', editContact);
+        document.getElementById("submitForm").addEventListener('click', submitForm);
+        document.getElementById("deleteContact").addEventListener('click', deleteContact);
+        document.getElementById("deleteContactEdit").addEventListener('click', deleteContact);
+        
+        document.getElementById('avatar').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.match('image.*')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.querySelector('#avatarImage img');
+                    if (img) {
+                        img.src = event.target.result;
+                    } else {
+                        document.getElementById("avatarImage").innerHTML = 
+                            `<img src="${event.target.result}" width="200">`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert("Please select a valid image file");
             }
+        });
+        
+        function getId(){
+            var url = window.location.href;
+            var pos = url.search("=");
+            var id = url.slice(pos + 1);
+            return id;
+        }
 
-            function getContact(){
-                fetch(rootPath + 'controller/get-contacts/?id=' + id)
-                .then(function(response){
-                    return response.json();
-                })
-                .then(function(data){
-                    displayOutput(data);
-                })
+        function getContact(){
+            fetch(rootPath + 'controller/get-contacts/?id=' + id)
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                displayOutput(data);
+            })
+        }
+
+        function homeLink(){
+            window.open("index.html", "_self");
+        }
+
+        function displayOutput(data){
+            avatarImg = `
+            <img src="${rootPath}/controller/uploads/${data[0].avatar}" width="200" />
+            `;
+            document.getElementById("avatarImage").innerHTML = avatarImg;
+            document.getElementById("firstname").value = data[0].firstname;
+            document.getElementById("lastname").value = data[0].lastname;
+            document.getElementById("mobile").value = data[0].mobile;
+            document.getElementById("email").value = data[0].email;
+        }
+
+        function editContact(){
+            document.getElementById("firstname").readOnly = false;
+            document.getElementById("lastname").readOnly = false;
+            document.getElementById("mobile").readOnly = false;
+            document.getElementById("email").readOnly = false;
+            document.getElementById("avatarLabel").style.display = "block";
+            document.getElementById("viewModeButtons").style.display = "none";
+            document.getElementById("editModeButtons").style.display = "block";
+        }
+
+        function submitForm(e){
+            e.preventDefault();
+
+            const form = new FormData(document.querySelector("#editForm"));
+            const avatarFile = document.getElementById('avatar').files[0];
+    
+            if(avatarFile) {
+                form.append('avatar', avatarFile);
             }
+    
+            form.append('apiKey', apiKey);
+            form.append('id', id);
+    
+            fetch(rootPath + 'controller/edit-contact/', {
+                method: 'POST',
+                body: form
+            })
+            .then(function(response){
+                return response.text();
+            })
+            .then(function(data){
+                if(data == "1"){
+                    alert("Contact edited.");
+                    homeLink();
+                }else{
+                    alert(data);
+                    homeLink();
+                }
+            })
+        }
 
-            function homeLink(){
-                window.open("index.html", "_self");
-            }
+        function deleteContact(){
+            var confirmDelete = confirm("Delete contact. Are you sure?");
 
-            function displayOutput(data){
-                avatarImg = `
-                <img src="${rootPath}/controller/uploads/${data[0].avatar}" width="200" />
-                `
-                document.getElementById("avatarImage").innerHTML = avatarImg;
-                document.getElementById("firstname").value = data[0].firstname;
-                document.getElementById("lastname").value = data[0].lastname;
-                document.getElementById("mobile").value = data[0].mobile;
-                document.getElementById("email").value = data[0].email;
-            }
-
-            function editContact(){
-                document.getElementById("firstname").readOnly = false;
-                document.getElementById("lastname").readOnly = false;
-                document.getElementById("mobile").readOnly = false;
-                document.getElementById("email").readOnly = false;
-                document.getElementById("avatar").hidden = false;
-                document.getElementById("submitForm").hidden = false;
-            }
-
-            function submitForm(e){
-                e.preventDefault();
-
-                const form = new FormData(document.querySelector("#editForm"));
-                form.append('apiKey', apiKey);
-                form.append('id', id);
-                fetch(rootPath + 'controller/edit-contact/', {
-                    method: 'POST',
-                    headers: {'Accept': 'application/json, *.*'},
-                    body: form
-                })
+            if(confirmDelete == true){
+                fetch(rootPath + 'controller/delete-contact/?id=' + id)
                 .then(function(response){
                     return response.text();
                 })
                 .then(function(data){
                     if(data == "1"){
-                        alert("Contact edited.");
                         homeLink();
-                    }else{
+                    } else {
                         alert(data);
-                        homeLink();
                     }
                 })
             }
-
-            function deleteContact(){
-                var confirmDelete = confirm("Delete contact. Are you sure?");
-
-                if(confirmDelete == true){
-                    fetch(rootPath + 'controller/delete-contact/?id=' + id)
-                    .then(function(response){
-                        return response.text();
-                    })
-                    .then(function(data){
-                        if(data == "1"){
-                            homeLink();
-                        } else {
-                            alert(data);
-                        }
-                    })
-                }
-            }
-        </script>
-    </body>
+        }
+    </script>
+</body>
 </html>

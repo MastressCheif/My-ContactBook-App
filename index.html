@@ -1,53 +1,120 @@
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title></title>
-    </head>
-    <body onload="fetchContacts()">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Book</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1-8.313-12.454z"/>
+        </svg>
+    </button>
+
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Contact Book</h1>
+        </header>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search contacts..." oninput="searchContacts()">
+            <button class="search-btn" type="button" onclick="searchContacts()">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
 
         <div id="table">Contacts loading...</div>
-        <button id="refresh" type="button">Refresh</button>
-        <button id="addContact" type="button">Add Contact</button>
 
-        <script src="config.js"></script>
-        <script>
-            document.getElementById("refresh").addEventListener('click', fetchContacts);
-            document.getElementById("addContact").addEventListener('click', addContact);
+        <div class="action-buttons">
+            <button id="refresh" type="button" class="btn refresh-btn">Refresh</button>
+            <button id="addContact" type="button" class="btn add-btn">Add Contact</button>
+        </div>
+    </div>
 
-            function fetchContacts(){
-                fetch(rootPath + "controller/get-contacts/")
-                .then(function(response){
-                    return response.json();
-                })
-                .then(function(data){
-                    displayOutput(data);
-                    //console.log(data);
-                })
+    <script src="config.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.querySelector('.theme-toggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Check for saved theme preference or use system preference
+        const currentTheme = localStorage.getItem('theme') || 
+                            (prefersDarkScheme.matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Contact search and display functionality
+        let allContacts = [];
+
+        document.getElementById("refresh").addEventListener('click', fetchContacts);
+        document.getElementById("addContact").addEventListener('click', addContact);
+
+        function fetchContacts(){
+            fetch(rootPath + "controller/get-contacts/")
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                allContacts = data;
+                displayOutput(data);
+            })
+        }
+
+        function displayOutput(data){
+            let output = "<table>";
+
+            for(a in data){
+                output += `
+                    <tr onclick="editContact(${data[a].id})">
+                        <td><img src="${rootPath}controller/uploads/${data[a].avatar}" width="40"/></td>
+                        <td><h5>${data[a].firstname}</h5></td>
+                        <td><h5>${data[a].lastname}</h5></td>
+                    </tr>
+                `;
             }
-
-            function displayOutput(data){
-                output = "<table>";
-
-                for(a in data){
-                    output += `
-                        <tr onclick="editContact(${data[a].id})">
-                            <td><img src="${rootPath}controller/uploads/${data[a].avatar}" width="40"/></td>
-                            <td><h5>${data[a].firstname}</h5></td>
-                            <td><h5>${data[a].lastname}</h5></td>
-                        </tr>
-
-                    `
-                }
-                output += "</table>";
-                document.getElementById("table").innerHTML = output;
+            output += "</table>";
+            document.getElementById("table").innerHTML = output;
+        }
+        
+        function searchContacts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (!searchTerm) {
+                displayOutput(allContacts);
+                return;
             }
-             function addContact(){
-                window.open("add-contact.html", "_self");
-             }   
             
-             function editContact(id){
-                window.open("edit-contact.html?id=" + id, "_self");
-             }
-        </script>
-    </body>
+            const filteredContacts = allContacts.filter(contact => {
+                const first = (contact.firstname || '').toLowerCase();
+                const last = (contact.lastname || '').toLowerCase();
+                const full = (contact.firstname + ' ' + contact.lastname).toLowerCase();
+                return (
+                    first.includes(searchTerm) || 
+                    last.includes(searchTerm) || 
+                    full.includes(searchTerm)
+                );
+            });
+            
+            displayOutput(filteredContacts);
+        }
+        
+        function addContact(){
+            window.open("add-contact.html", "_self");
+        }   
+        
+        function editContact(id){
+            window.open("edit-contact.html?id=" + id, "_self");
+        }
+
+        // Initialize the app
+        fetchContacts();
+    </script>
+</body>
 </html>
